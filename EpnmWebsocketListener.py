@@ -17,7 +17,8 @@ class EpnmWebsocketListener(object):
             host: str,
             username: str,
             password: str,
-            output_file: pathlib.Path = pathlib.Path(__file__).resolve().parent.joinpath("epnm_output"),
+            output_file: pathlib.Path = pathlib.Path().cwd().joinpath("epnm_output"),
+            echo: bool = False,
             verbosity=4
         ):
         self.logger = get_logger(name='EPNM-WS', verbosity=verbosity)
@@ -26,6 +27,11 @@ class EpnmWebsocketListener(object):
         self.password = password
         self.output_file = pathlib.Path(output_file)
         self.logger.info(f"Incomming messages will be writen to {str(self.output_file)}")
+        self.echo = echo
+        if self.echo:
+            self.logger.info(f"Incomming messages will be echoed to stdout")
+        else:
+            self.logger.info(f"Incomming messages will NOT be echoed to stdout")
         self.extra_headers : dict = self.get_auth_header()
         self.ssl_context : ssl.SSLContext = self.get_ssl_context()
         self.counters = {
@@ -50,7 +56,12 @@ class EpnmWebsocketListener(object):
         return ssl_context
 
     def write_output(self, of, data):
-        of.write(f"{json.dumps(data)}\n")
+        if isinstance(data, str):
+            of.write(f"{data}\n")
+        elif isinstance(data, dict):
+            of.write(f"{json.dumps(data)}\n")
+        else:
+            raise TypeError(f"Expected str or dict, got {type(data)} instead.")
 
     def update_counter_ok(self):
         self.counters['received_total'] += 1
@@ -60,6 +71,14 @@ class EpnmWebsocketListener(object):
         self.counters['received_total'] += 1
         self.counters['received_error'] += 1
 
+    def echo_output(self, data):
+        if isinstance(data, str):
+            print(data)
+        elif isinstance(data, dict):
+            print(f"{json.dumps(data, indent=2)}")
+        else:
+            print(data)
+
     async def message_handler(self, connection: websockets.WebSocketClientProtocol):
         with self.output_file.open(mode="a") as of:
             async for message in connection:
@@ -68,6 +87,8 @@ class EpnmWebsocketListener(object):
                     self.logger.debug("Received JSON message.")
                     self.update_counter_ok()
                     self.write_output(of=of, data=data)
+                    if self.echo is True:
+                        self.echo_output(data=data)
                 except Exception as e:
                     self.update_counter_error()
                     print(repr(e))

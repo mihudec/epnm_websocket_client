@@ -4,7 +4,7 @@ import pathlib
 from typing import List, Literal
 
 
-DEFAULT_LOG_PATH = pathlib.Path(__file__).resolve().parent.joinpath('epnm_websocket.log')
+DEFAULT_LOG_PATH = pathlib.Path().cwd().joinpath('epnm_websocket.log')
 VERBOSITY_MAP = {
     1: logging.CRITICAL,
     2: logging.ERROR,
