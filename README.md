@@ -1,5 +1,15 @@
 # Quickstart
 
+## Instalation
+
+Download ZIP file or clone the repository:
+
+```
+git clone git@github.com:mihudec/epnm_websocket_client.git
+```
+
+
+
 ## Usage
 
 ```

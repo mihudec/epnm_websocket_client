@@ -2,7 +2,7 @@ import argparse
 import getpass
 import sys
 
-import EpnmWebsocketListener
+from EpnmWebsocketListener import EpnmWebsocketListener
 
 
 class PasswordPromptAction(argparse.Action):
