@@ -90,9 +90,11 @@ class EpnmWebsocketListener(object):
                     if self.echo is True:
                         self.echo_output(data=data)
                 except Exception as e:
-                    self.update_counter_error()
-                    print(repr(e))
-                    self.logger.error(f"Cannot parse message: {message}")
+                    if message == "X":
+                        self.logger.info("Received heartbeat message (?)")
+                    else:
+                        self.update_counter_error()
+                        self.logger.error(f"Cannot parse message: {message}. Exception: {repr(e)}")
 
     async def consume(self, topic: Literal['inventory', 'service-activation', 'template-execution', 'alarm', 'all']):
 
