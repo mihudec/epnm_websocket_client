@@ -8,6 +8,7 @@ Download ZIP file or clone the repository:
 git clone git@github.com:mihudec/epnm_websocket_client.git
 ```
 
+Note: Tested on Python 3.9, partialy on 3.8
 
 
 ## Usage
