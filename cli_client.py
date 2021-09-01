@@ -41,16 +41,16 @@ def parse_args():
     arg_parser.add_argument("--host", dest="host", type=str, required=True, help="IP or FQDN of EPNM Server")
     arg_parser.add_argument("--user", dest="username", type=str, required=True, help="Username")
     arg_parser.add_argument("--ask-password", dest="password", action=PasswordPromptAction, type=str, required=True, help="Password prompt switch - DO NOT ENTER PASSWORD, wait for prompt")
-    arg_parser.add_argument("--topic", dest="topic", type=str, required=True, help="Topic", choices=['inventory', 'service-activation', 'template-execution', 'alarm', 'all'])
+    arg_parser.add_argument("-t", "--topic", dest="topic", type=str, required=True, help="Topic", choices=['inventory', 'service-activation', 'template-execution', 'alarm', 'all'])
     arg_parser.add_argument("-v", "--verbosity", dest="verbosity", type=int, choices=[1, 2, 3, 4, 5], default=4, help="Verbosity level")
-    arg_parser.add_argument("--echo", dest="echo", action='store_true', default=False, help="If specified, will print incomming messages to stdout")
+    arg_parser.add_argument("-e", "--echo", dest="echo", action='store_true', default=False, help="If specified, will print incomming messages to stdout")
+    arg_parser.add_argument("-o", "--output-file", dest="output_file", default="epnm_output", help="Output file name (default 'epnm_output')")
     args = arg_parser.parse_args()
-    # args["password"] = getpass.getpass()
     return args
 
 def main():
     args = parse_args()
-    client = EpnmWebsocketListener(host=args.host, username=args.username, password=args.password, echo=args.echo, verbosity=args.verbosity)
+    client = EpnmWebsocketListener(host=args.host, username=args.username, password=args.password, echo=args.echo, verbosity=args.verbosity, output_file=args.output_file)
     client.run(topic=args.topic)
 
 if __name__ == '__main__':

@@ -21,8 +21,8 @@ class EpnmWebsocketListener(object):
             echo: bool = False,
             verbosity=4
         ):
-        self.logger = get_logger(name='EPNM-WS', verbosity=verbosity)
         self.host = host
+        self.logger = get_logger(name=f'EPNM-WS-{self.host}', verbosity=verbosity)
         self.username = username
         self.password = password
         self.output_file = pathlib.Path(output_file)
@@ -37,7 +37,8 @@ class EpnmWebsocketListener(object):
         self.counters = {
             'received_total': 0,
             'received_ok': 0,
-            'received_error': 0
+            'received_error': 0,
+            'received_heartbeat': 0
         }
 
 
@@ -71,6 +72,10 @@ class EpnmWebsocketListener(object):
         self.counters['received_total'] += 1
         self.counters['received_error'] += 1
 
+    def update_counter_heartbeat(self):
+        self.counters['received_total'] += 1
+        self.counters['received_heartbeat'] += 1
+
     def echo_output(self, data):
         if isinstance(data, str):
             print(data)
@@ -84,14 +89,14 @@ class EpnmWebsocketListener(object):
             async for message in connection:
                 try:
                     data = json.loads(message)
-                    self.logger.debug("Received JSON message.")
+                    self.logger.debug(f"Received JSON message:>> {message}")
                     self.update_counter_ok()
                     self.write_output(of=of, data=data)
                     if self.echo is True:
                         self.echo_output(data=data)
                 except Exception as e:
                     if message == "X":
-                        self.logger.info("Received heartbeat message (?)")
+                        self.logger.info("Received heartbeat message ('X')")
                     else:
                         self.update_counter_error()
                         self.logger.error(f"Cannot parse message: {message}. Exception: {repr(e)}")
